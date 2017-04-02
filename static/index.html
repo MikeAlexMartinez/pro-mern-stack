@@ -7,13 +7,17 @@
     <script src="./lib/react.js"></script>
     <script src="./lib/react-dom.js"></script>
     <style>
-        .styled {
-            color: red;
+        table.bordered-table th, td {
+            border: 1px solid silver; 
+            padding: 4px;
+        }
+        table.bordered-table {
+            border-collapse: collapse;
         }
     </style>
 </head>
 <body>
-    <div id="contents"></div><!-- this is where our componen twill appear -->
+    <div id="contents"></div><!-- this is where our component will appear -->
     <script src="/App.js"></script>
 </body>
 
