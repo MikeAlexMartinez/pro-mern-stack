@@ -9,6 +9,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var contentNode = document.getElementById('contents');
+var count = 0;
 
 var IssueFilter = function (_React$Component) {
     _inherits(IssueFilter, _React$Component);
@@ -45,6 +46,8 @@ var IssueRow = function (_React$Component2) {
     _createClass(IssueRow, [{
         key: 'render',
         value: function render() {
+            count++;
+            console.log(count);
             var issue = this.props.issue;
             return React.createElement(
                 'tr',
@@ -165,33 +168,49 @@ var IssueTable = function (_React$Component3) {
     return IssueTable;
 }(React.Component);
 
-/*class borderWrap extends React.Component {
-    render() {
-        const borderedStyle = {border: "1px solid silver", padding: 6};
-        return (
-            <div style={borderedStyle}>
-                {this.props.children}
-            </div>
-        );
-    }
-}*/
-
 var IssueAdd = function (_React$Component4) {
     _inherits(IssueAdd, _React$Component4);
 
     function IssueAdd() {
         _classCallCheck(this, IssueAdd);
 
-        return _possibleConstructorReturn(this, (IssueAdd.__proto__ || Object.getPrototypeOf(IssueAdd)).apply(this, arguments));
+        var _this4 = _possibleConstructorReturn(this, (IssueAdd.__proto__ || Object.getPrototypeOf(IssueAdd)).call(this));
+
+        _this4.handleSubmit = _this4.handleSubmit.bind(_this4);
+        return _this4;
     }
 
     _createClass(IssueAdd, [{
+        key: 'handleSubmit',
+        value: function handleSubmit(e) {
+            e.preventDefault();
+            var form = document.forms.issueAdd;
+            this.props.createIssue({
+                owner: form.owner.value,
+                title: form.title.value,
+                status: 'New',
+                created: new Date()
+            });
+            // clear the form for the next input
+            form.owner.value = "";form.title.value = "";
+        }
+    }, {
         key: 'render',
         value: function render() {
             return React.createElement(
                 'div',
                 null,
-                'This is a placeholder for an Issue Add entry form.'
+                React.createElement(
+                    'form',
+                    { name: 'issueAdd', onSubmit: this.handleSubmit },
+                    React.createElement('input', { type: 'text', name: 'owner', placeholder: 'Owner' }),
+                    React.createElement('input', { type: 'text', name: 'title', placeholder: 'Title' }),
+                    React.createElement(
+                        'button',
+                        null,
+                        'Add'
+                    )
+                )
             );
         }
     }]);
@@ -217,26 +236,36 @@ var IssueList = function (_React$Component5) {
 
         var _this5 = _possibleConstructorReturn(this, (IssueList.__proto__ || Object.getPrototypeOf(IssueList)).call(this));
 
-        _this5.state = { issues: issues };
-        setTimeout(_this5.createTestIssue.bind(_this5), 2000);
+        _this5.state = { issues: [] };
+        _this5.createIssue = _this5.createIssue.bind(_this5);
         return _this5;
     }
 
     _createClass(IssueList, [{
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            this.loadData();
+        }
+
+        // this is called outside the constructor to ensure that the component has
+        // been correctly mounted within the DOM first.
+
+    }, {
+        key: 'loadData',
+        value: function loadData() {
+            var _this6 = this;
+
+            setTimeout(function () {
+                _this6.setState({ issues: issues });
+            }, 500);
+        }
+    }, {
         key: 'createIssue',
         value: function createIssue(newIssue) {
             var newIssues = this.state.issues.slice();
             newIssue.id = this.state.issues.length + 1;
             newIssues.push(newIssue);
             this.setState({ issues: newIssues });
-        }
-    }, {
-        key: 'createTestIssue',
-        value: function createTestIssue() {
-            this.createIssue({
-                status: 'New', owner: 'Pieta', created: new Date(),
-                title: 'Completion date should be optional'
-            });
         }
     }, {
         key: 'render',
@@ -253,7 +282,7 @@ var IssueList = function (_React$Component5) {
                 React.createElement('hr', null),
                 React.createElement(IssueTable, { issues: this.state.issues }),
                 React.createElement('hr', null),
-                React.createElement(IssueAdd, null)
+                React.createElement(IssueAdd, { createIssue: this.createIssue })
             );
         }
     }]);
