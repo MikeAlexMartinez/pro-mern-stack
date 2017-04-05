@@ -94,18 +94,24 @@ class IssueList extends React.Component {
     // this is called outside the constructor to ensure that the component has
     // been correctly mounted within the DOM first.
     loadData() {
-        fetch('/api/issues').then(response => 
-            response.json()
-        ).then(data => {
-            console.log("Total count of records:", data._metadata.total_count);
-            data.records.forEach(issue => {
-                issue.created = new Date(issue.created);
-                if (issue.completionDate)
-                    issue.completionDate = new Date(issue.completionDate);
-            });
-            this.setState({issues: data.records });
+        fetch('/api/issues').then(response => {
+            if (response.ok) {
+                response.json().then(data => {
+                    console.log("Total count of records:", data._metadata.total_count);
+                    data.records.forEach(issue => {
+                        issue.created = new Date(issue.created);
+                        if (issue.completionDate)
+                            issue.completionDate = new Date(issue.completionDate);
+                    });
+                    this.setState({issues: data.records });
+                });
+            } else {
+                response.json().then(error => {
+                    console.log("Failed to fetch issues: " + error.message);
+                });
+            }
         }).catch(err => {
-            console.log(err);
+            console.log("Error in fetching data from server: " + err);
         });
     }
 
