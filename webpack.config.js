@@ -2,11 +2,11 @@ const webpack = require('webpack');
 
 module.exports = {
     entry: {
-        app: './src/App.jsx',
-        vendor: ['react','react-dom','whatwg-fetch']
+        app: ['./src/App.jsx'],
+        vendor: ['react','react-dom','whatwg-fetch', 'babel-polyfill']
     },
     output: {
-        path: __dirname + '/static/',
+        path: __dirname + './static/',
         filename: 'app.bundle.js'
     },
     plugins: [
@@ -14,15 +14,6 @@ module.exports = {
             name: 'vendor', filename: 'vendor.bundle.js'
         })
     ],
-    devServer: {
-        port: 8000,
-        contentBase: 'static',
-        proxy: {
-            '/api/*': {
-                target: 'http://localhost:3000'
-            }
-        }
-    },
     module: {
         loaders: [
             {
@@ -33,5 +24,15 @@ module.exports = {
                 }
             }
         ]
-    }
+    },
+    devServer: {
+        port: 8000,
+        contentBase: 'static',
+        proxy: {
+            '/api/*': {
+                target: 'http://localhost:3000'
+            }
+        }
+    },
+    devtool: 'source-map',
 }

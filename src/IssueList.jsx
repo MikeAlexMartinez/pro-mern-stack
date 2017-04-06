@@ -21,7 +21,8 @@ export default class IssueList extends React.Component {
     // this is called outside the constructor to ensure that the component has
     // been correctly mounted within the DOM first.
     loadData() {
-        fetch('/api/issues').then(response => {
+        fetch('http://localhost:8000/api/issues').then(response => {
+            console.log(response);
             if (response.ok) {
                 response.json().then(data => {
                     console.log("Total count of records:", data._metadata.total_count);
@@ -43,7 +44,7 @@ export default class IssueList extends React.Component {
     }
 
     createIssue(newIssue) {
-        fetch('/api/issues', {
+        fetch('http://localhost:8000/api/issues', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newIssue)

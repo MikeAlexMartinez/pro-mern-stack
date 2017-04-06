@@ -1,24 +1,41 @@
-'use strict';
-const express = require('express');
-const bodyParser = require('body-parser');
-const MongoClient = require('mongodb').MongoClient;
+/* ES2015 style import statements */
+import SourceMapSupport from 'source-map-support';
+SourceMapSupport.install();
+import 'babel-polyfill';
 
-const Issue = require('./issue.js');
+import express from 'express';
+import bodyParser from 'body-parser';
+import { MongoClient } from 'mongodb';
+
+import Issue from './issue.js';
+
+/* start express */
+const app = express();
+/* Initialises express to use static middleware in the site */
+app.use(express.static('static'));
+/* enable body parsing */
+app.use(bodyParser.json());
 
 // define db in global scope.
 let db;
 
-const app = express();
-
-
-/* Initialises express to use static middleware in the site */
-app.use(express.static('static'));
-
-/* enable body parsing */
-app.use(bodyParser.json());
-
 /* enable strong etags */
 app.enable('etag');
+
+/* Enables hot module reloading via middleware */
+if(process.env.NODE_ENV !== 'production') {
+    const webpack = require('webpack');
+    const webpackDevMiddleware = require('webpack-dev-middleware');
+    const webpackHotMiddleware = require('webpack-hot-middleware');
+
+    const config = require('../webpack.config');
+    config.entry.app.push('webpack-hot-middleware/client', 'webpack/hot/only-dev-server');
+    config.plugins.push(new webpack.HotModuleReplacementPlugin());
+
+    const bundler = webpack(config);
+    app.use(webpackDevMiddleware(bundler, {noInfo: true}));
+    app.use(webpackHotMiddleware(bundler, {log: console.log}));
+}
 
 app.get('/api/issues', (req, res) => {
     console.log(req.method + ": " + req.url + ", " + req.headers["user-agent"]);
