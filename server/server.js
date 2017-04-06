@@ -5,17 +5,14 @@ const MongoClient = require('mongodb').MongoClient;
 
 const Issue = require('./issue.js');
 
-// define db in global scope.
-let db;
-
 const app = express();
-
-
 /* Initialises express to use static middleware in the site */
 app.use(express.static('static'));
-
 /* enable body parsing */
 app.use(bodyParser.json());
+
+// define db in global scope.
+let db;
 
 /* enable strong etags */
 app.enable('etag');
@@ -61,7 +58,7 @@ app.post('/api/issues', (req, res) => {
 });
 
 // Connect to database and start server
-MongoClient.connect('mongodb://localhost/issuetracker').then(connection => {
+MongoClient.connect('mongodb://localhost:27017/issuetracker').then(connection => {
     db = connection;
     app.listen(3000, function() {
         console.log('App started on port 3000');
