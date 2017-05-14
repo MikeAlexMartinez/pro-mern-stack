@@ -70,7 +70,7 @@ console.log('About to attempt starting!');
 MongoClient.connect('mongodb://localhost:27017/issuetracker').then((connection) => {
   db = connection;
   app.listen(3000, function() {
-    console.log('App started on port 3000');
+    console.log('Yay! App started on port 3000');
   }); 
 }).catch((error) => {
   console.log('ERROR: ', error);
