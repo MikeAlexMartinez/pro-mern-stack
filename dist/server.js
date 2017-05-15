@@ -36,9 +36,12 @@ let db;
 app.enable('etag');
 
 app.get('/api/issues', (req, res) => {
-  console.log(req.method + ': ' + req.url + ', ' + req.headers['user-agent']);
+  console.log(req.method + ' (Updated): ' + req.url + ', ' + req.headers['user-agent']);
+  const filter = {};
+  if (req.query.status) filter.status = req.query.status;
+  console.log(filter);
 
-  db.collection('issues').find().toArray().then(issues => {
+  db.collection('issues').find(filter).toArray().then(issues => {
     console.log(issues.length + ' issues retrieved.');
     const metadata = { total_count: issues.length };
     res.json({ _metadata: metadata, records: issues });
