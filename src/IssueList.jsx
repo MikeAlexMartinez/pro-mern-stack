@@ -9,7 +9,7 @@ export default class IssueList extends React.Component {
     constructor() {
         super();
         this.state = { issues: [] };
-
+        this.setFilter = this.setFilter.bind(this);
         // Need to bind this object to method as it will be called
         // from within a child component
         this.createIssue = this.createIssue.bind(this);
@@ -26,6 +26,10 @@ export default class IssueList extends React.Component {
             return;
         }
         this.loadData();
+    }
+
+    setFilter(query) {
+        this.props.router.push({ pathname: this.props.location.pathname, query });
     }
 
     // this is called outside the constructor to ensure that the component has
@@ -80,7 +84,7 @@ export default class IssueList extends React.Component {
         return(
             <div>
                 <h1>Issue Tracker - MERN Stack Tutorial</h1>
-                <IssueFilter />
+                <IssueFilter setFilter={this.setFilter} />
                 <hr />
                 <IssueTable issues={this.state.issues}/>
                 <hr />
@@ -92,6 +96,7 @@ export default class IssueList extends React.Component {
 
 IssueList.propTypes = {
     location: React.PropTypes.object.isRequired,
+    router: React.PropTypes.object,
 };
 
 // changed to stateless function
