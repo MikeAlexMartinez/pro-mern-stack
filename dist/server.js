@@ -16,6 +16,10 @@ var _bodyParser2 = _interopRequireDefault(_bodyParser);
 
 var _mongodb = require('mongodb');
 
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
+
 var _issue = require('./issue.js');
 
 var _issue2 = _interopRequireDefault(_issue);
@@ -36,9 +40,12 @@ let db;
 app.enable('etag');
 
 app.get('/api/issues', (req, res) => {
-  console.log(req.method + ': ' + req.url + ', ' + req.headers['user-agent']);
+  console.log(req.method + ' (Updated): ' + req.url + ', ' + req.headers['user-agent']);
+  const filter = {};
+  if (req.query.status) filter.status = req.query.status;
+  console.log(filter);
 
-  db.collection('issues').find().toArray().then(issues => {
+  db.collection('issues').find(filter).toArray().then(issues => {
     console.log(issues.length + ' issues retrieved.');
     const metadata = { total_count: issues.length };
     res.json({ _metadata: metadata, records: issues });
@@ -73,13 +80,17 @@ app.post('/api/issues', (req, res) => {
   });
 });
 
+app.get('*', (req, res) => {
+  res.sendFile(_path2.default.resolve('static/index.html'));
+});
+
 console.log('About to attempt starting!');
 
 // Connect to database and start server
 _mongodb.MongoClient.connect('mongodb://localhost:27017/issuetracker').then(connection => {
   db = connection;
   app.listen(3000, function () {
-    console.log('App started on port 3000');
+    console.log('Yay! App started on port 3000');
   });
 }).catch(error => {
   console.log('ERROR: ', error);

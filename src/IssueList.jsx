@@ -1,5 +1,6 @@
 import React from 'react';
 import 'whatwg-fetch';
+import { Link } from 'react-router';
 
 import IssueFilter from './IssueFilter.jsx';
 import IssueAdd from './IssueAdd.jsx';
@@ -8,7 +9,7 @@ export default class IssueList extends React.Component {
     constructor() {
         super();
         this.state = { issues: [] };
-
+        this.setFilter = this.setFilter.bind(this);
         // Need to bind this object to method as it will be called
         // from within a child component
         this.createIssue = this.createIssue.bind(this);
@@ -18,10 +19,23 @@ export default class IssueList extends React.Component {
         this.loadData();
     }
 
+    componentDidUpdate(prevProps) {
+        const oldQuery = prevProps.location.query;
+        const newQuery = this.props.location.query;
+        if(oldQuery.status === newQuery.status) {
+            return;
+        }
+        this.loadData();
+    }
+
+    setFilter(query) {
+        this.props.router.push({ pathname: this.props.location.pathname, query });
+    }
+
     // this is called outside the constructor to ensure that the component has
     // been correctly mounted within the DOM first.
     loadData() {
-        fetch('/api/issues').then(response => {
+        fetch(`/api/issues${this.props.location.search}`).then(response => {
             if (response.ok) {
                 response.json().then(data => {
                     console.log("Total count of records:", data._metadata.total_count);
@@ -69,8 +83,7 @@ export default class IssueList extends React.Component {
     render() {
         return(
             <div>
-                <h1>Issue Tracker - MERN Stack Tutorial</h1>
-                <IssueFilter />
+                <IssueFilter setFilter={this.setFilter} />
                 <hr />
                 <IssueTable issues={this.state.issues}/>
                 <hr />
@@ -80,12 +93,16 @@ export default class IssueList extends React.Component {
     }
 };
 
+IssueList.propTypes = {
+    location: React.PropTypes.object.isRequired,
+    router: React.PropTypes.object,
+};
 
 // changed to stateless function
 function IssueRow(props){
     return (
         <tr>
-            <td>{props.issue._id}</td>
+            <td><Link to={`/issues/${props.issue._id}`}>{props.issue._id.substr(-4)}</Link></td>
             <td>{props.issue.status}</td>
             <td>{props.issue.owner}</td>
             <td>{props.issue.created.toDateString()}</td>
