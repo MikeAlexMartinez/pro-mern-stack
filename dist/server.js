@@ -16,6 +16,10 @@ var _bodyParser2 = _interopRequireDefault(_bodyParser);
 
 var _mongodb = require('mongodb');
 
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
+
 var _issue = require('./issue.js');
 
 var _issue2 = _interopRequireDefault(_issue);
@@ -74,6 +78,10 @@ app.post('/api/issues', (req, res) => {
     console.log(error);
     res.status(500).json({ message: 'Internal Server Error: $(error)' });
   });
+});
+
+app.get('*', (req, res) => {
+  res.sendFile(_path2.default.resolve('static/index.html'));
 });
 
 console.log('About to attempt starting!');

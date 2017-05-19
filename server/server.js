@@ -5,6 +5,7 @@ import SourceMapSupport from 'source-map-support';
 import express from 'express';
 import bodyParser from 'body-parser';
 import { MongoClient } from 'mongodb';
+import path from 'path';
 
 import Issue from './issue.js';
 
@@ -62,6 +63,10 @@ app.post('/api/issues', (req, res) => {
       console.log(error);
       res.status(500).json({ message: 'Internal Server Error: $(error)' });
     });
+});
+
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve('static/index.html'));
 });
 
 console.log('About to attempt starting!');
