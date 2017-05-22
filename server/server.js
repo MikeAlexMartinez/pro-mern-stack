@@ -26,7 +26,9 @@ app.get('/api/issues', (req, res) => {
   console.log(req.method + ' (Updated): ' + req.url + ', ' + req.headers['user-agent']);
   const filter = {};
   if (req.query.status) filter.status = req.query.status;
-  console.log(filter);
+  if (req.query.efort_lte || req.query.effort_gte) filter.effort = {};
+  if (req.query.effort_lte) filter.effort.$lte = parseInt(req.query.effort_lte, 10);
+  if (req.query.effort_gte) filter.effort.$gte = parseInt(req.query.effort_gte, 10);
 
   db.collection('issues').find(filter).toArray().then((issues) => {
     console.log(issues.length + ' issues retrieved.')
