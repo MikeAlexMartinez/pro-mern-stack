@@ -43,6 +43,9 @@ app.get('/api/issues', (req, res) => {
   console.log(req.method + ' (Updated): ' + req.url + ', ' + req.headers['user-agent']);
   const filter = {};
   if (req.query.status) filter.status = req.query.status;
+  if (req.query.effort_lte || req.query.effort_gte) filter.effort = {};
+  if (req.query.effort_lte) filter.effort.$lte = parseInt(req.query.effort_lte, 10);
+  if (req.query.effort_gte) filter.effort.$gte = parseInt(req.query.effort_gte, 10);
   console.log(filter);
 
   db.collection('issues').find(filter).toArray().then(issues => {
@@ -77,6 +80,27 @@ app.post('/api/issues', (req, res) => {
   }).catch(error => {
     console.log(error);
     res.status(500).json({ message: 'Internal Server Error: $(error)' });
+  });
+});
+
+app.get('/api/issues/:id', (req, res) => {
+  let issueId;
+  try {
+    console.log("try: ", req.params.id);
+    issueId = new _mongodb.ObjectId(req.params.id);
+    console.log(issueId);
+  } catch (error) {
+    console.log(req.params.id);
+    console.log(issueId);
+    res.status(422).json({ message: `Invalid issue ID format: ${error}` });
+    return;
+  }
+
+  db.collection('issues').find({ _id: issueId }).limit(1).next().then(issue => {
+    if (!issue) res.status(404).json({ message: `No such issue: ${issueId}` });else res.json(issue);
+  }).catch(error => {
+    console.log(error);
+    res.status(500).json({ message: `Internal Server Error: ${error}` });
   });
 });
 
