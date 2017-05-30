@@ -13,7 +13,15 @@ export default class IssueList extends React.Component {
         // Need to bind this object to method as it will be called
         // from within a child component
         this.createIssue = this.createIssue.bind(this);
+        this.deleteIssue = this.deleteIssue.bind(this);
     }
+
+    deleteIssue(id) {
+        fetch(`/api/issues/${id}`, { method: 'DELETE' }).then(response => {
+            if(!response.ok) alert('Failed to delete issue');
+            else this.loadData();
+        });
+    } 
 
     componentDidMount() {
         this.loadData();
@@ -22,7 +30,9 @@ export default class IssueList extends React.Component {
     componentDidUpdate(prevProps) {
         const oldQuery = prevProps.location.query;
         const newQuery = this.props.location.query;
-        if(oldQuery.status === newQuery.status) {
+        if(oldQuery.status === newQuery.status
+            && oldQuery.effort_gte === newQuery.effort_gte
+            && oldQuery.effort_lte === newQuery.effort_lte) {
             return;
         }
         this.loadData();
@@ -83,9 +93,9 @@ export default class IssueList extends React.Component {
     render() {
         return(
             <div>
-                <IssueFilter setFilter={this.setFilter} />
+                <IssueFilter setFilter={this.setFilter} initFilter={this.props.location.query} />
                 <hr />
-                <IssueTable issues={this.state.issues}/>
+                <IssueTable issues={this.state.issues} deleteIssue={this.deleteIssue} />
                 <hr />
                 <IssueAdd createIssue={this.createIssue} />
             </div>
@@ -99,7 +109,11 @@ IssueList.propTypes = {
 };
 
 // changed to stateless function
-function IssueRow(props){
+const IssueRow = (props) => {
+    function onDeleteClick() {
+        props.deleteIssue(props.issue._id);
+    }
+    
     return (
         <tr>
             <td><Link to={`/issues/${props.issue._id}`}>{props.issue._id.substr(-4)}</Link></td>
@@ -109,13 +123,22 @@ function IssueRow(props){
             <td>{props.issue.effort}</td>
             <td>{props.issue.completionDate ? props.issue.completionDate.toDateString() : ''}</td>
             <td>{props.issue.title}</td>
+            <td><button onClick={onDeleteClick}>Delete</button></td>
         </tr>
     );
 }
 
+IssueRow.propTypes = {
+    issue: React.PropTypes.object.isRequired,
+    deleteIssue: React.PropTypes.func.isRequired,
+};
+
 // changed to stateless function
 function IssueTable(props) {
-    const issueRows = props.issues.map(issue => <IssueRow key={issue._id} issue={issue} />);
+    const issueRows = props.issues.map(issue => 
+        <IssueRow key={issue._id} issue={issue} deleteIssue={props.deleteIssue} />
+    );
+
     return (
         <table className="bordered-table">
             <thead>
@@ -127,6 +150,7 @@ function IssueTable(props) {
                     <th>Effort</th>
                     <th>Completion Date</th>
                     <th>Title</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -135,3 +159,8 @@ function IssueTable(props) {
         </table>
     );
 }
+
+IssueTable.propTypes = {
+    issues: React.PropTypes.array.isRequired,
+    deleteIssue: React.PropTypes.func.isRequired,
+};
