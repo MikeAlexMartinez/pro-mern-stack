@@ -104,6 +104,49 @@ app.get('/api/issues/:id', (req, res) => {
   });
 });
 
+app.put('/api/issues/:id', (req, res) => {
+  let issueId;
+  try {
+    issueId = new _mongodb.ObjectId(req.params.id);
+  } catch (error) {
+    res.status(422).json({ message: `Invalid issue ID format: ${error}` });
+    return;
+  }
+
+  const issue = req.body;
+  delete issue._id;
+
+  const err = _issue2.default.validateIssue(issue);
+  if (err) {
+    res.status(422).json({ message: `Invalid request: ${err}` });
+    return;
+  }
+
+  db.collection('issues').update({ _id: issueId }, _issue2.default.convertIssue(issue)).then(() => db.collection('issues').find({ _id: issueId }).limit(1).next()).then(savedIssue => {
+    res.json(savedIssue);
+  }).catch(error => {
+    console.log(error);
+    res.status(500).json({ message: `Internal Server Error: ${error}` });
+  });
+});
+
+app.delete('/api/issues/:id', (req, res) => {
+  let issueId;
+  try {
+    issueId = new _mongodb.ObjectId(req.params.id);
+  } catch (error) {
+    res.status(422).json({ message: `Invalid issue ID format: ${error}` });
+    return;
+  }
+
+  db.collection('issues').deleteOne({ _id: issueId }).then(deleteResult => {
+    if (deleteResult.result.n === 1) res.json({ status: 'OK' });else res.json({ status: 'Warning: object not found' });
+  }).catch(error => {
+    console.log(error);
+    res.status(500).json({ message: `Internal Server Error: ${error}` });
+  });
+});
+
 app.get('*', (req, res) => {
   res.sendFile(_path2.default.resolve('static/index.html'));
 });
