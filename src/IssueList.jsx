@@ -1,6 +1,7 @@
 import React from 'react';
 import 'whatwg-fetch';
 import { Link } from 'react-router';
+import { Button, Glyphicon, Table, Panel } from 'react-bootstrap';
 
 import IssueFilter from './IssueFilter.jsx';
 import IssueAdd from './IssueAdd.jsx';
@@ -93,10 +94,10 @@ export default class IssueList extends React.Component {
     render() {
         return(
             <div>
-                <IssueFilter setFilter={this.setFilter} initFilter={this.props.location.query} />
-                <hr />
+                <Panel collapsible header="Filter">
+                    <IssueFilter setFilter={this.setFilter} initFilter={this.props.location.query} />
+                </Panel> 
                 <IssueTable issues={this.state.issues} deleteIssue={this.deleteIssue} />
-                <hr />
                 <IssueAdd createIssue={this.createIssue} />
             </div>
         );
@@ -123,7 +124,9 @@ const IssueRow = (props) => {
             <td>{props.issue.effort}</td>
             <td>{props.issue.completionDate ? props.issue.completionDate.toDateString() : ''}</td>
             <td>{props.issue.title}</td>
-            <td><button onClick={onDeleteClick}>Delete</button></td>
+            <td>
+                <Button bsSize="xsmall" onClick={onDeleteClick}><Glyphicon glyph="trash" /></Button>
+            </td>
         </tr>
     );
 }
@@ -140,7 +143,7 @@ function IssueTable(props) {
     );
 
     return (
-        <table className="bordered-table">
+        <Table bordered condensed hover responsive>
             <thead>
                 <tr>
                     <th>Id</th>
@@ -156,7 +159,7 @@ function IssueTable(props) {
             <tbody>
                 {issueRows}    
             </tbody>
-        </table>
+        </Table>
     );
 }
 
