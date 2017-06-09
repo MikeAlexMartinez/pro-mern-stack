@@ -49,8 +49,7 @@ export default class DateInput extends React.Component {
     }
 
     render() {
-        const value = (this.state.focused || !this.state.valid) ? 
-            this.state.value : this.displayFormat(this.props.value);
+        const value = (this.state.focused || !this.state.valid) ? this.state.value : this.displayFormat(this.props.value);
         const childProps = Object.assign({}, this.props);
         delete childProps.onValidityChange;
         return (

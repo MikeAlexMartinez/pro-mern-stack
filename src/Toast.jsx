@@ -3,7 +3,7 @@ import { Alert, Collapse } from 'react-bootstrap';
 
 export default class Toast extends React.Component {
     componentDidUpdate() {
-        if (this.prop.showing) {
+        if (this.props.showing) {
             clearTimeout(this.dismissTimer);
             this.dismissTimer = setTimeout(this.props.onDismiss, 5000);
         }
