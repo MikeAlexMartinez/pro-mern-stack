@@ -3,18 +3,34 @@ import 'whatwg-fetch';
 import { Link } from 'react-router';
 import { Button, Glyphicon, Table, Panel } from 'react-bootstrap';
 
+import Toast from './Toast.jsx';
 import IssueFilter from './IssueFilter.jsx';
-import IssueAdd from './IssueAdd.jsx';
 
 export default class IssueList extends React.Component {
     constructor() {
         super();
-        this.state = { issues: [] };
+        this.state = { 
+            issues: [],
+            toastVisible: false, toastMessage: '', toastType: 'success',
+        };
         this.setFilter = this.setFilter.bind(this);
         // Need to bind this object to method as it will be called
         // from within a child component
-        this.createIssue = this.createIssue.bind(this);
         this.deleteIssue = this.deleteIssue.bind(this);
+        this.showError = this.showError.bind(this);
+        this.dismissToast = this.dismissToast.bind(this);
+    }
+
+    showError(message) {
+        this.setState({
+            toastVisible: true,
+            toastMessage: message,
+            toastType: 'danger'
+        });
+    }
+
+    dismissToast() {
+        this.setState({ toastVisible: false });
     }
 
     deleteIssue(id) {
@@ -59,35 +75,11 @@ export default class IssueList extends React.Component {
                 });
             } else {
                 response.json().then(error => {
-                    console.log("Failed to fetch issues: " + error.message);
+                    this.showError(`Failed to fetch issues ${error.message}`);
                 });
             }
         }).catch(err => {
-            console.log("Error in fetching data from server: " + err);
-        });
-    }
-
-    createIssue(newIssue) {
-        fetch('/api/issues', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newIssue)
-        }).then( response => {
-            if (response.ok) {
-                response.json().then(updatedIssue => {
-                    updatedIssue.created = new Date(updatedIssue.created);
-                    if(updatedIssue.completionDate)
-                        updatedIssue.completionDate = new Date(updatedIssue.completionDate);
-                    const newIssues = this.state.issues.concat(updatedIssue);
-                    this.setState({ issues: newIssues });
-                });
-            } else {
-                response.json().then(error => {
-                    console.error("Failed to add issue: " + error.message);
-                });
-            }
-        }).catch(err => {
-            console.error("Error in sending data to the server: " + err.message);
+            this.showError(`Error in fetching data from server: ${err}`);
         });
     }
 
@@ -98,7 +90,12 @@ export default class IssueList extends React.Component {
                     <IssueFilter setFilter={this.setFilter} initFilter={this.props.location.query} />
                 </Panel> 
                 <IssueTable issues={this.state.issues} deleteIssue={this.deleteIssue} />
-                <IssueAdd createIssue={this.createIssue} />
+                <Toast
+                    showing={this.state.toastVisible}
+                    message={this.state.toastMessage}
+                    onDismiss={this.dismissToast}
+                    bsStyle={this.state.toastType}
+                />
             </div>
         );
     }

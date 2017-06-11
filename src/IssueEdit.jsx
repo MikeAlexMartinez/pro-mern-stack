@@ -95,7 +95,7 @@ export default class IssueEdit extends React.Component {
                     issue.created = new Date(issue.created);
                     issue.completionDate = issue.completionDate != null ?
                         new Date(issue.completionDate) : null;
-                    issue.effort = issue.effort != null ? parseInt(issue.effort) : '';
+                    issue.effort = issue.effort != null ? parseInt(issue.effort) : 0;
                     this.setState({ issue });
                 });
             } else {

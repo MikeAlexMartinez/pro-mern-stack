@@ -17,7 +17,7 @@ export default class Toast extends React.Component {
         return (
             <Collapse in={this.props.showing}>
                 <div style={{position: 'fixed', top: 30, left: 0, right: 0,
-                            testAlign: 'center' }}>
+                            textAlign: 'center' }}>
                     <Alert 
                         style={{ display: 'inline-block', width: 500 }}
                         bsStyle={this.props.bsStyle}

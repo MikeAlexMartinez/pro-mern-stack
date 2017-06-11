@@ -5,6 +5,7 @@ import { Router, Route, Redirect, browserHistory, withRouter } from 'react-route
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem, Glyphicon } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 
+import IssueAddNavItem from './IssueAddNavItem.jsx';
 import IssueList from './IssueList.jsx';
 import IssueEdit from './IssueEdit.jsx';
 
@@ -25,7 +26,7 @@ const Header = () => (
       </LinkContainer>
     </Nav>
     <Nav pullRight>
-      <NavItem><Glyphicon glyph="plus" /> Create Issue</NavItem>
+      <IssueAddNavItem />
       <NavDropdown id="user-dropdown" title={<Glyphicon glyph="option-horizontal" />} noCaret>
         <MenuItem>Logout</MenuItem>
       </NavDropdown>
