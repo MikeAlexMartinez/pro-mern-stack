@@ -5,7 +5,8 @@ import SourceMapSupport from 'source-map-support';
 import express from 'express';
 import bodyParser from 'body-parser';
 import { MongoClient, ObjectId } from 'mongodb';
-import path from 'path';
+//import path from 'path';
+import renderedPageRouter from './renderedPageRouter.jsx';
 
 import Issue from './issue.js';
 
@@ -142,9 +143,12 @@ app.delete('/api/issues/:id', (req, res) => {
   });
 });
 
+/*
 app.get('*', (req, res) => {
   res.sendFile(path.resolve('static/index.html'));
-});
+});*/
+
+app.use('/', renderedPageRouter);
 
 console.log('About to attempt starting!');
 
