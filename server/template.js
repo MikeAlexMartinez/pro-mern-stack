@@ -1,4 +1,4 @@
-export default function template(body) {
+export default function template(body, initialState) {
     return `<!DOCTYPE HTML>
             <html>
             <head>
@@ -11,7 +11,9 @@ export default function template(body) {
                 </style>
             </head>
             <body>
-                <div id="contents">${body}</div><!-- this is where our component will appear -->
+                <div id="contents">${body}</div>
+                <!-- this is where our component will appear -->
+                <script>window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};</script>
                 <script src="/vendor.bundle.js"></script>
                 <script src="/app.bundle.js"></script>
             </body>
