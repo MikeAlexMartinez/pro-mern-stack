@@ -4,10 +4,13 @@
   "description": "code from examples in pro mern stack publication",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon -w dist dist/server.js",
+    "start": "node dist dist/server.bundle.js",
+    "compile-server": "webpack --config webpack.server-config.js",
+    "watch-server": "webpack --config webpack.server-config.js --watch",
     "start-hook": "nodemon -e js,jsx -w server,src server/start_hook.js",
     "compile": "webpack",
     "watch": "webpack-dev-server --hot --inline",
+    "dev-all": "npm run watch & npm run watch-server & npm start",
     "dev-all-win": "npm-run-all -p -r watch watch-server start",
     "dev-all-hook": "npm run watch & npm run start-hook",
     "lint": "eslint --ext js,jsx src server webpack.config.js",
@@ -22,10 +25,14 @@
     "bootstrap": "^3.3.7",
     "express": "^4.15.2",
     "mongodb": "^2.2.25",
-    "react": "^15.4.2",
-    "react-dom": "^15.4.2",
     "source-map-support": "^0.4.14",
-    "whatwg-fetch": "^2.0.3"
+    "whatwg-fetch": "^2.0.3",
+    "object-assign": "^4.1.0",
+    "react": "^15.4.2",
+    "react-bootstrap": "^0.31.0",
+    "react-dom": "^15.4.2",
+    "react-router": "^2.7.0",
+    "react-router-bootstrap": "^0.23.3" 
   },
   "devDependencies": {
     "babel-cli": "^6.24.0",
@@ -42,9 +49,6 @@
     "eslint-plugin-react": "^6.10.3",
     "nodemon": "^1.11.0",
     "npm-run-all": "^4.0.2",
-    "react-bootstrap": "^0.31.0",
-    "react-router": "^2.7.0",
-    "react-router-bootstrap": "^0.23.3",
     "webpack": "^2.3.3",
     "webpack-dev-server": "^2.4.2"
   }

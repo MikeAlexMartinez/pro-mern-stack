@@ -1,16 +1,11 @@
-import 'babel-polyfill';
-
-import SourceMapSupport from 'source-map-support';
-
 import express from 'express';
 import bodyParser from 'body-parser';
-import { MongoClient, ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 //import path from 'path';
 import renderedPageRouter from './renderedPageRouter.jsx';
 
 import Issue from './issue.js';
 
-SourceMapSupport.install();
 const app = express();
 /* Initialises express to use static middleware in the site */
 app.use(express.static('static'));
@@ -153,11 +148,8 @@ app.use('/', renderedPageRouter);
 console.log('About to attempt starting!');
 
 // Connect to database and start server
-MongoClient.connect('mongodb://localhost:27017/issuetracker').then((connection) => {
-  db = connection;
-  app.listen(3000, function() {
-    console.log('Yay! App started on port 3000');
-  }); 
-}).catch((error) => {
-  console.log('ERROR: ', error);
-});
+function setDb(newDb) {
+  db = newDb;
+}
+
+export { app, setDb };
