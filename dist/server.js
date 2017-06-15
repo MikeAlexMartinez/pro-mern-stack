@@ -41,6 +41,7 @@ app.enable('etag');
 
 app.get('/api/issues', (req, res) => {
   console.log(req.method + ' (Updated): ' + req.url + ', ' + req.headers['user-agent']);
+
   const filter = {};
   if (req.query.status) filter.status = req.query.status;
   if (req.query.effort_lte || req.query.effort_gte) filter.effort = {};
@@ -48,14 +49,37 @@ app.get('/api/issues', (req, res) => {
   if (req.query.effort_gte) filter.effort.$gte = parseInt(req.query.effort_gte, 10);
   console.log(filter);
 
-  db.collection('issues').find(filter).toArray().then(issues => {
-    console.log(issues.length + ' issues retrieved.');
-    const metadata = { total_count: issues.length };
-    res.json({ _metadata: metadata, records: issues });
-  }).catch(error => {
-    console.log(error);
-    res.status(500).json({ message: `Internal Server Error: ${error}` });
-  });
+  if (req.query._summary === undefined) {
+    const offset = req.query._offset ? parseInt(req.query._offset, 10) : 0;
+    let limit = req.query.limit ? parseInt(req.query._limit, 10) : 20;
+    if (limit > 50) limit = 50;
+
+    const cursor = db.collection('issues').find(filter).sort({ _id: 1 }).skip(offset).limit(limit);
+
+    let totalCount;
+    cursor.count(false).then(result => {
+      totalCount = result;
+      return cursor.toArray();
+    }).then(issues => {
+      console.log(issues.length + ' issues retrieved.');
+      res.json({ metadata: { totalCount }, records: issues });
+    }).catch(error => {
+      console.log(error);
+      res.status(500).json({ message: `Internal Server Error: ${error}` });
+    });
+  } else {
+    db.collection('issues').aggregate([{ $match: filter }, { $group: { _id: { owner: '$owner', status: '$status' }, count: { $sum: 1 } } }]).toArray().then(results => {
+      const stats = {};
+      results.forEach(result => {
+        if (!stats[result._id.owner]) stats[result._id.owner] = {};
+        stats[result._id.owner][result._id.status] = result.count;
+      });
+      res.json(stats);
+    }).catch(error => {
+      console.log(error);
+      res.status(500).json({ message: `Internal Server Error: ${error}` });
+    });
+  }
 });
 
 app.post('/api/issues', (req, res) => {
