@@ -14,3 +14,7 @@ run mongo scripts/init.mongo.js.
 To start up react in windows run npm run dev-all-win
 in unix run npm run dev-all-hook. 
 
+Windows distributions require css from react-select and bootstrap dist files in the static files.
+
+Unix and Mac OSX allows the creation of soft-links.
+

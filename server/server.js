@@ -31,6 +31,7 @@ app.get('/api/issues', (req, res) => {
   if (req.query.effort_lte) filter.effort.$lte = parseInt(req.query.effort_lte, 10);
   if (req.query.effort_gte) filter.effort.$gte = parseInt(req.query.effort_gte, 10);
   console.log(filter);
+  if (req.query.search) filter.$text = { $search : req.query.search };
 
   if (req.query._summary === undefined) {
     const offset = req.query._offset ? parseInt(req.query._offset, 10) : 0;
