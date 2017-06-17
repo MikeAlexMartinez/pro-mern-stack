@@ -3,7 +3,7 @@ import 'whatwg-fetch';
 import { Link } from 'react-router';
 import { Button, Glyphicon, Table, Panel, Pagination } from 'react-bootstrap';
 
-import Toast from './Toast.jsx';
+import withToast from './withToast.jsx';
 import IssueFilter from './IssueFilter.jsx';
 
 // changed to stateless function
@@ -67,7 +67,7 @@ IssueTable.propTypes = {
 
 const PAGE_SIZE = 10;
 
-export default class IssueList extends React.Component {
+class IssueList extends React.Component {
     static dataFetcher({ urlBase, location }) {
         const query = Object.assign({}, location.query);
         const pageStr = query._page;
@@ -102,31 +102,14 @@ export default class IssueList extends React.Component {
         });
         this.state = { 
             issues,
-            toastVisible: false, toastMessage: '', toastType: 'success',
             totalCount: data.metadata.totalCount,
         };
 
         // Need to bind this object to method as it will be called
         // from within a child component
         this.setFilter = this.setFilter.bind(this);
-
         this.selectPage = this.selectPage.bind(this);
-
         this.deleteIssue = this.deleteIssue.bind(this);
-        this.showError = this.showError.bind(this);
-        this.dismissToast = this.dismissToast.bind(this);
-    }
-
-    showError(message) {
-        this.setState({
-            toastVisible: true,
-            toastMessage: message,
-            toastType: 'danger'
-        });
-    }
-
-    dismissToast() {
-        this.setState({ toastVisible: false });
     }
 
     deleteIssue(id) {
@@ -195,12 +178,6 @@ export default class IssueList extends React.Component {
                     next prev boundaryLinks
                 />
                 <IssueTable issues={this.state.issues} deleteIssue={this.deleteIssue} />
-                <Toast
-                    showing={this.state.toastVisible}
-                    message={this.state.toastMessage}
-                    onDismiss={this.dismissToast}
-                    bsStyle={this.state.toastType}
-                />
             </div>
         );
     }
@@ -209,4 +186,10 @@ export default class IssueList extends React.Component {
 IssueList.propTypes = {
     location: React.PropTypes.object.isRequired,
     router: React.PropTypes.object,
+    showError: React.PropTypes.func.isRequired,
 };
+
+const IssueListWithToast = withToast(IssueList);
+IssueListWithToast.dataFetcher = IssueList.dataFetcher;
+
+export default IssueListWithToast;

@@ -3,27 +3,40 @@ import { FormGroup, FormControl, ControlLabel,
          ButtonToolbar, Button, Panel, Form, Col, Alert } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 
-import Toast from './Toast.jsx';
+import withToast from './withToast.jsx';
 import NumInput from './NumInput.jsx';
 import DateInput from './DateInput.jsx';
 
-export default class IssueEdit extends React.Component {
-    constructor() {
-        super();
-        this.state = {
-            issue: {
+class IssueEdit extends React.Component {
+    static dataFetcher({ params, urlBase }) {
+        return fetch(`${urlBase || ''}/api/issues/${params.id}`).then(response => {
+            if (!response.ok) return response.json().then(error => Promise.reject(error));
+            return response.json().then(data => ({ IssueEdit: data }));
+        });
+    }
+
+    constructor(props, context) {
+        super(props, context);
+        let issue;
+        if(context.initialState && context.initialState.IssueEdit) {
+            issue = context.initialState.IssueEdit;
+            issue.created = new Date(issue.created);
+            issue.completionDate = issue.completionDate != null ? 
+                new Date(issue.completionDate) : null;
+        } else {
+            issue = {
                 _id: '', title: '', status: '', owner: '', effort: null,
                 completionDate: null, created: null,
-            },
+            };
+        }
+        
+        this.state = {
+            issue,
             invalidFields: {},
             showingValidation: false,
-            toastVisible: false, toastMessage: '', toastType: 'success',
         };
         this.dismissValidation = this.dismissValidation.bind(this);
         this.showValidation = this.showValidation.bind(this);
-        this.showSuccess = this.showSuccess.bind(this);
-        this.showError = this.showError.bind(this);
-        this.dismissToast = this.dismissToast.bind(this);
         this.onChange = this.onChange.bind(this);
         this.onValidityChange = this.onValidityChange.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
@@ -39,6 +52,13 @@ export default class IssueEdit extends React.Component {
         }
     }
 
+    onChange(e, convertedValue) {
+        const issue = Object.assign({}, this.state.issue);
+        const value = (convertedValue !== undefined) ? convertedValue: e.target.value;
+        issue[e.target.name] = value;
+        this.setState({ issue });
+    }
+    
     onValidityChange(e, valid) {
         const invalidFields = Object.assign({}, this.state.invalidFields);
 
@@ -48,13 +68,6 @@ export default class IssueEdit extends React.Component {
             delete invalidFields[e.target.name];
         }
         this.setState({ invalidFields });
-    }
-
-    onChange(e, convertedValue) {
-        const issue = Object.assign({}, this.state.issue);
-        const value = (convertedValue !== undefined) ? convertedValue: e.target.value;
-        issue[e.target.name] = value;
-        this.setState({ issue });
     }
 
     onSubmit(e) {
@@ -76,49 +89,29 @@ export default class IssueEdit extends React.Component {
                         updatedIssue.completionDate = new Date(updatedIssue.completionDate);
                     }
                     this.setState({ issue: updatedIssue });
-                    this.showSuccess('Updated issue successfully');
+                    this.props.showSuccess('Updated issue successfully');
                 });
             } else {
                 response.json().then(error => {
-                    this.showError(`Failed to update issue: ${error.message}`);
+                    this.props.showError(`Failed to update issue: ${error.message}`);
                 });
             }
         }).catch(err => {
-            this.showError(`Error in sending data to srever: ${err.message}`);
+            this.props.showError(`Error in sending data to srever: ${err.message}`);
         });
     }
 
     loadData() {
-        fetch(`/api/issues/${this.props.params.id}`).then(response => {
-            if (response.ok) {
-                response.json().then(issue => {
-                    issue.created = new Date(issue.created);
-                    issue.completionDate = issue.completionDate != null ?
-                        new Date(issue.completionDate) : null;
-                    issue.effort = issue.effort != null ? parseInt(issue.effort) : 0;
-                    this.setState({ issue });
-                });
-            } else {
-                response.json().then(error => {
-                    this.showError(`Failed to fetch issue: ${error.message}`);
-                });
-            }
-
-        }).catch(err => {
-            this.showError(`Error in fetching data from server: ${err.message}`);
-        });
-    }
-    
-    showSuccess(message) {
-        this.setState({ toastVisible: true, toastMessage: message, toastType: 'success' });
-    }
-
-    showError(message) {
-        this.setState({ toastVisible: true, toastMessage: message, toastType: 'danger' });
-    }
-
-    dismissToast() {
-        this.setState({ toastVisible: false });
+        IssueEdit.dataFetcher({ params: this.props.params })
+            .then(data => {
+                const issue = data.IssueEdit;
+                issue.created = new Date(issue.created);
+                issue.completionDate = issue.completionDate != null ?
+                    new Date(issue.completionDate) : null;
+                this.setState({ issue });
+            }).catch(err => {
+                this.props.showError(`Error in fetching data from server: ${err.message}`);
+            });
     }
 
     showValidation() {
@@ -222,11 +215,6 @@ export default class IssueEdit extends React.Component {
                         <Col smOffset={3} sm={9}>{validationMessage}</Col>
                     </FormGroup>
                 </Form>
-                <Toast
-                    showing={this.state.toastVisible}
-                    message={this.state.toastMessage}
-                    onDismiss={this.dismissToast} bsStyle={this.state.toastType}
-                />
             </Panel>
         );
     }
@@ -234,4 +222,11 @@ export default class IssueEdit extends React.Component {
 
 IssueEdit.propTypes = {
     params: React.PropTypes.object.isRequired,
-}
+    showSuccess: React.PropTypes.func.isRequired,
+    showError: React.PropTypes.func.isRequired,
+};
+
+const IssueEditWithToast = withToast(IssueEdit);
+IssueEditWithToast.dataFetcher = IssueEdit.dataFetcher;
+
+export default IssueEditWithToast;

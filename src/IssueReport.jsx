@@ -2,7 +2,7 @@ import React from 'react';
 import { Panel, Table } from 'react-bootstrap';
 
 import IssueFilter from './IssueFilter.jsx';
-import Toast from './Toast.jsx';
+import withToast from './withToast.jsx';
 
 const statuses = ['New', 'Open', 'Assigned', 'Fixed', 'Verified', 'Closed'];
 
@@ -22,7 +22,7 @@ StatRow.propTypes = {
     counts: React.PropTypes.object.isRequired,
 };
 
-export default class IssueReport extends React.Component {
+class IssueReport extends React.Component {
     static dataFetcher({ urlBase, location}) {
         const search = location.search ? `${location.search}&_summary` : '?_summary';
         return fetch(`${urlBase || ''}/api/issues${search}`).then(response => {
@@ -41,11 +41,8 @@ export default class IssueReport extends React.Component {
         }
         this.state = {
             stats,
-            toastVisible: false, toastMessage: '', toastType: 'success',
         };
         this.setFilter = this.setFilter.bind(this);
-        this.showError = this.showError.bind(this);
-        this.dismissToast = this.dismissToast.bind(this);
     }
 
     componentDidMount() {
@@ -65,14 +62,6 @@ export default class IssueReport extends React.Component {
 
     setFilter(query) {
         this.props.router.push({ pathname: this.props.location.pathname, query });
-    }
-
-    showError(message) {
-        this.setState({ toastVisible: true, toastMessage: message, toastType: 'danger' });
-    }
-
-    dismissToast() {
-        this.setState({ toastVisible: false });
     }
 
     loadData() {
@@ -109,12 +98,6 @@ export default class IssueReport extends React.Component {
                         )}
                     </tbody>
                 </Table>
-                <Toast
-                    showing={this.state.toastVisible}
-                    message={this.state.toastMessage}
-                    onDismiss={this.dismissToast}
-                    bsStyle={this.state.toastType}
-                />
             </div>
         );
     }
@@ -123,8 +106,14 @@ export default class IssueReport extends React.Component {
 IssueReport.propTypes = {
     location: React.PropTypes.object.isRequired,
     router: React.PropTypes.object,
+    showError: React.PropTypes.func.isRequired,
 };
 
 IssueReport.contextTypes = {
     initialState: React.PropTypes.object,
 };
+
+const IssueReportWithToast = withToast(IssueReport);
+IssueReportWithToast.dataFetcher = IssueReport.dataFetcher;
+
+export default IssueReportWithToast;

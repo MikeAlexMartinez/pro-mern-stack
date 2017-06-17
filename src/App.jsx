@@ -9,11 +9,12 @@ import IssueAddNavItem from './IssueAddNavItem.jsx';
 import IssueList from './IssueList.jsx';
 import IssueEdit from './IssueEdit.jsx';
 import IssueReport from './IssueReport.jsx';
+import withToast from './withToast.jsx';
 
 const contentNode = document.getElementById('contents');
 const NoMatch = () => <p>Page Not Found</p>;
 
-const Header = () => (
+const Header = (props) => (
   <Navbar fluid>
     <Navbar.Header>
       <Navbar.Brand>Issue Tracker</Navbar.Brand>
@@ -27,7 +28,7 @@ const Header = () => (
       </LinkContainer>
     </Nav>
     <Nav pullRight>
-      <IssueAddNavItem />
+      <IssueAddNavItem showError={props.showError} />
       <NavDropdown id="user-dropdown" title={<Glyphicon glyph="option-horizontal" />} noCaret>
         <MenuItem>Logout</MenuItem>
       </NavDropdown>
@@ -35,9 +36,15 @@ const Header = () => (
   </Navbar>
 );
 
+Header.PropTypes = {
+  showError: React.PropTypes.func.isRequired,
+}
+
+const HeaderWithToast = withToast(Header);
+
 const App = (props) => (
   <div>
-    <Header />
+    <HeaderWithToast />
     <div className="container-fluid">
       {props.children}
       <hr />
